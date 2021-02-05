@@ -6,28 +6,29 @@ const router = express.Router();
 /* GET all clothing */
 router.route('/')
   .get(function(req, res) {
-    getClothingData((err, data) => {
-      if (err) {
-        console.log(err);
-      } else {
+    getClothingData()
+      .then(data => {
         console.log('Returning clothing data');
         res.send(data);
-      }
-    });
-
+      })
+      .catch(error => res.status(500).send(error))
+      .finally(() => console.log('All done processing promise.'));
+    
     console.log('Doing more work');
   });
 
-function getClothingData(callback) {
-  fs.readFile(datafile, 'utf-8', (err, data) => {
-    if (err) {
-      callback(err, null)
-    } else {
-      const clothingData = JSON.parse(data);
+function getClothingData() {
 
-      callback(null, clothingData);
-    }
-
+  return new Promise((resolve, reject) => {
+    fs.readFile(datafile, 'utf-8', (err, data) => {
+      if (err) {
+        reject(err)
+      } else {
+        const clothingData = JSON.parse(data);
+  
+       resolve(clothingData);
+      }
+    });
   });
 }
 
